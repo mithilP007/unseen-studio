@@ -1,0 +1,23 @@
+/* Cleanup standard mobile */
+@media (max-width: 1000px) {
+    .hero {
+        height: 125svh;
+    }
+
+    .hero-ui-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        margin-top: 3vh;
+    }
+
+    .grid-vertical,
+    .crosshair {
+        display: none;
+        /* Hide grid items on mobile for clean look */
+    }
+
+    .title {
+        margin-top: 2vh;
+    }
+}
