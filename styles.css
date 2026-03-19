@@ -1,11 +1,11 @@
 @font-face {
     font-family: "Mono Geist";
-    src: url(./fonts/gyByhwUxId8gMEwYGFWfOw.woff2);
+    src: url(./public/fonts/MonoGeist.woff2);
 }
 
 @font-face {
     font-family: "PP Neue Montreal";
-    src: url(./fonts/PPNeueMontreal-Regular.woff2);
+    src: url(./public/fonts/PPNeueMontreal-Regular.woff2);
 }
 
 :root {
@@ -23,7 +23,8 @@
     --dim-white: rgba(255, 255, 255, 0.4);
     --overlay-black: rgba(0, 0, 0, 0.4);
     --grid-color: rgba(255, 255, 255, 0.1);
-    --cursor-color: white; /* Initial color */
+    --cursor-color: white;
+    /* Initial color */
 }
 
 * {
@@ -251,7 +252,8 @@ canvas {
     position: fixed;
     pointer-events: none;
     z-index: 15;
-    background: rgba(255, 255, 255, 0.15); /* Always white/dim-white as requested */
+    background: rgba(255, 255, 255, 0.15);
+    /* Always white/dim-white as requested */
 }
 
 .cursor-line-v {
