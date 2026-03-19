@@ -1,0 +1,495 @@
+@font-face {
+    font-family: "Mono Geist";
+    src: url(./fonts/gyByhwUxId8gMEwYGFWfOw.woff2);
+}
+
+@font-face {
+    font-family: "PP Neue Montreal";
+    src: url(./fonts/PPNeueMontreal-Regular.woff2);
+}
+
+:root {
+    --hero-bg-color: #171717;
+    --about-bg-color: #dcdcdc;
+    /* Exact match light grey from about images */
+    --text-color: #d2d2d2;
+    --charcoal: #171717;
+    --studio-yellow: #ddff00;
+    --light-grey: #e2e2e2;
+    --medium-grey: #777777;
+    --deep-grey: #212121;
+    --dark-block: #222222;
+    --white: #ffffff;
+    --dim-white: rgba(255, 255, 255, 0.4);
+    --overlay-black: rgba(0, 0, 0, 0.4);
+    --grid-color: rgba(255, 255, 255, 0.1);
+    --cursor-color: white; /* Initial color */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+    width: 100%;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    font-family: "Mono Geist", sans-serif;
+    color: var(--text-color);
+    background: var(--hero-bg-color);
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+
+.hero {
+    position: relative;
+    height: 150svh;
+    background-color: var(--hero-bg-color);
+    overflow: hidden;
+}
+
+/* UI LAYER */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    /* Stay within viewport height and pinned */
+    z-index: 10;
+    pointer-events: none;
+    /* Crucial: Let pointer events pass to WebGL spiral */
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    position: absolute;
+
+    left: 2vw;
+    right: 2vw;
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+}
+
+.line1,
+.line2 {
+
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 750;
+    letter-spacing: -0.06em;
+    line-height: 0.6;
+}
+
+.line1 {
+    margin-top: 14px;
+    font-size: 12.5rem;
+}
+
+.line2 {
+    margin-top: 50px;
+    font-size: 12.5rem;
+}
+
+/* Background Paragraph (Behind WebGL) */
+.hero-background-content {
+    position: absolute;
+    top: -10rem;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.bg-paragraph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.small-logo {
+    width: 24px;
+    height: 24px;
+    background-color: var(--text-color);
+    mask: url(./public/svg/logo.svg) no-repeat center / contain;
+    -webkit-mask: url(./public/svg/logo.svg) no-repeat center / contain;
+    opacity: 0.8;
+}
+
+.small-logo svg {
+    display: none;
+    /* Hide any legacy inline SVG */
+}
+
+.bg-paragraph p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--text-color);
+    /* Fades behind spiral */
+    font-weight: 500;
+}
+
+/* UI Utils Bar */
+.hero-ui-bar {
+    position: absolute;
+    bottom: 45vh;
+    left: 2vw;
+    right: 2vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+.logo {
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    font-family: "PP Neue Montreal";
+}
+
+.right-utils {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2rem;
+    /* reduced overall gap for divider control */
+}
+
+/* Spiral Image Tooltip (Yellow Box) */
+.spiral-tooltip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 25;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    width: min-content;
+    /* Only as wide as text */
+}
+
+/* Square appears first */
+.tooltip-square {
+    width: 6px;
+    height: 6px;
+    background: var(--studio-yellow);
+    transform: scale(0);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.spiral-tooltip.active .tooltip-square {
+    transform: scale(1);
+}
+
+/* Text bar sweeps from left to right */
+.tooltip-text {
+    background: var(--studio-yellow);
+    color: var(--charcoal);
+    padding: 0.15rem 0.6rem;
+    font-family: "PP Neue Montreal", sans-serif;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-bottom: 3px;
+
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.spiral-tooltip.active .tooltip-text {
+    clip-path: inset(0 0 0 0);
+    transition-delay: 0.1s;
+}
+
+.coords {
+    display: flex;
+    align-items: center;
+    font-family: "PP Neue Montreal", Courier, monospace;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-color);
+    gap: 2rem;
+    /* Decreased gap as requested */
+}
+
+/* Cursor Crosshair Lines */
+.cursor-line-v,
+.cursor-line-h {
+    position: fixed;
+    pointer-events: none;
+    z-index: 15;
+    background: rgba(255, 255, 255, 0.15); /* Always white/dim-white as requested */
+}
+
+.cursor-line-v {
+    top: 0;
+    width: 1.5px;
+    height: 100%;
+}
+
+.cursor-line-h {
+    left: 0;
+    height: 1px;
+    width: 100%;
+}
+
+.cursor-crosshair {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s ease;
+}
+
+.cursor-crosshair::before,
+.cursor-crosshair::after {
+    content: '';
+    position: absolute;
+    background: var(--cursor-color);
+    transition: background 0.2s ease;
+    /* Color handled via JS logic */
+}
+
+.cursor-crosshair::before {
+    width: 100%;
+    height: 1px;
+}
+
+.cursor-crosshair::after {
+    height: 100%;
+    width: 1px;
+}
+
+
+
+.menu-btn {
+    position: relative;
+    background: var(--light-grey);
+    color: var(--charcoal);
+    border: none;
+    padding: 0.5rem 3.25rem;
+    font-family: "PP Neue Montreal";
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    pointer-events: auto;
+    /* Buttons should be clickable! */
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+    outline: none;
+    z-index: 2;
+    /* Ensure button is above its background corners */
+}
+
+/* Tracking corner markers for hover state - Now with 4 corners */
+.menu-btn::before,
+.menu-btn::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: -1;
+    /* Place behind the button to prevent overlap glitches */
+}
+
+/* We use multiple box-shadows to create 4 corners from 2 pseudo-elements */
+.menu-btn::before {
+    top: -10px;
+    left: -10px;
+    border-top: 2px solid var(--medium-grey);
+    border-left: 2px solid var(--medium-grey);
+    transform: translate(6px, 6px);
+}
+
+.menu-btn::after {
+    bottom: -10px;
+    right: -10px;
+    border-bottom: 2px solid var(--medium-grey);
+    border-right: 2px solid var(--medium-grey);
+    transform: translate(-6px, -6px);
+}
+
+/* Static horizontal and vertical lines to complete "corner" look if needed, 
+   but for the "bug", ensure they are correctly positioned */
+
+.menu-btn:hover {
+    background: var(--studio-yellow) !important;
+    color: var(--charcoal) !important;
+}
+
+.menu-btn:hover::before {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+.menu-btn:hover::after {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+
+
+.crosshair {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    opacity: 0.6;
+}
+
+.crosshair .v,
+.crosshair .h {
+    position: absolute;
+    background: var(--text-color);
+}
+
+.crosshair .v {
+    top: 0;
+    left: 11px;
+    width: 1px;
+    height: 24px;
+}
+
+.crosshair .h {
+    top: 11px;
+    left: 0;
+    width: 24px;
+    height: 1px;
+}
+
+.ch-left {
+    top: 55vh;
+    left: 30vw;
+}
+
+.ch-right {
+    top: 56vh;
+    right: 30vw;
+    /* Matches vertical line */
+}
+
+/* ---------------- ABOUT SECTION OVERRIDE ---------------- */
+.about {
+    width: 100vw;
+    height: 100vh;
+    background: var(--about-bg-color);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.about-content-simple {
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem;
+}
+
+.about-title-large {
+    font-family: "PP Neue Montreal", sans-serif;
+    font-size: 12vw;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.about-text-content {
+    max-width: 650px;
+    font-family: "PP Neue Montreal", sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    color: var(--deep-grey);
+}
+
+.about-text-content p {
+    margin-bottom: 2rem;
+}
+
+/* Cleanup standard mobile */
+@media (max-width: 1000px) {
+    .hero {
+        height: 125svh;
+    }
+
+    .info-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        margin-top: 3vh;
+    }
+
+    .grid-vertical,
+    .crosshair {
+        display: none;
+        /* Hide grid items on mobile for clean look */
+    }
+
+    .title {
+        margin-top: 2vh;
+    }
+
+    .about-grid {
+        flex-direction: column;
+    }
+
+    .about-left {
+        flex: auto;
+    }
+
+    .image-showcase {
+        margin-top: 5vh;
+        height: 50vh;
+        width: 100%;
+    }
+}
