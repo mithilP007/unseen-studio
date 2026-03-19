@@ -5,77 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudioDialect 3D Spiral Image Gallery | thakuma.dev</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./css/main.css">
 </head>
 
 <body>
-    <section class="hero">
-        <!-- Background Content (Behind WebGL) -->
-        <div class="hero-background-content">
-            <div class="bg-paragraph">
-                <div class="small-logo"></div>
-                <p>Award-winning motion, design and interactive<br>experiences that connect culture, technology,
-                    and<br>contemporary aesthetics.</p>
-            </div>
-        </div>
-
-        <div class="ui-layer">
-            <!-- Fullscreen Cursor Crosshair Lines -->
-            <div class="cursor-line-v"></div>
-            <div class="cursor-line-h"></div>
-            <div class="cursor-crosshair"></div>
-            <div class="spiral-tooltip" id="spiral-tooltip">
-                <div class="tooltip-square"></div>
-                <div class="tooltip-text">FACE YOUR FEARS</div>
-            </div>
-
-            <!-- Huge Text -->
-            <h1 class="title">
-                <div class="line1">EXPERT&nbsp;DIGITAL</div>
-                <div class="line2">PRODUCTION</div>
-            </h1>
-
-            <!-- UI Utils Bar -->
-            <div class="hero-ui-bar">
-                <div class="logo">DIALECT</div>
-
-                <div class="right-utils">
-                    <div class="coords">X : <span id="x-coord-hero">0</span> &nbsp; Y : <span id="y-coord-hero">0</span></div>
-                    <button class="menu-btn">[ MENU ]</button>
-                </div>
-            </div>
-
-            <!-- Grid Overlays -->
-            <div class="grid-vertical"></div>
-            <div class="crosshair ch-left">
-                <div class="v"></div>
-                <div class="h"></div>
-            </div>
-            <div class="crosshair ch-right">
-                <div class="v"></div>
-                <div class="h"></div>
-            </div>
-        </div>
-
-        <!-- WebGL Canvas will be injected here by script.js -->
-    </section>
-
-    <!-- New About Section replacing the old scrolling stub -->
-    <section class="about">
-        <div class="about-content-simple">
-            <h2 class="about-title-large">INTERSECTING CULTURE</h2>
-            <div class="about-text-content">
-                <p>Studio Dialect explores how technology can shape the way<br>people move, feel and interact.</p>
-                <p>From websites to installations, we design experiences that sit<br>comfortably at the edge of what's
-                    possible, guided by a belief in<br>thoughtful design, meaningful experiences and a love
-                    of<br>solving hard problems.</p>
-            </div>
-        </div>
-    </section>
+    <!-- App Entry Point: Sections will be injected here via script.js -->
+    <div id="app"></div>
 
     <!-- Load Three.js and Interaction Logic -->
     <script type="module" src="./js/script.js"></script>
-
 </body>
 
 </html>
