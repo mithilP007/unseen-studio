@@ -6,25 +6,47 @@ import { initRenderer } from "./renderer.js";
 import { createSpiral } from "./spiral.js";
 import { initUIControls } from "./ui.js";
 
-// 1. Load HTML Partials using Vite's ?raw import
+// Partials and Page Controllers
 import heroHTML from "../partials/hero.html?raw";
 import aboutHTML from "../partials/about.html?raw";
+import { initMenuOverlay } from "./menuOverlay.js";
+import { renderWorkPage } from "./workPage.js";
+import { renderContactPage } from "./contactPage.js";
+import { createRouter } from "./router.js";
 
+// 1. Initialize DOM Architecture (Preserving Homepage in #home-view)
 const appContainer = document.getElementById("app");
 if (appContainer) {
-  appContainer.innerHTML = heroHTML + aboutHTML;
+  appContainer.innerHTML = `
+    <!-- Homepage Container (Completely Preserved) -->
+    <div id="home-view" class="page-view">
+      ${heroHTML}
+      ${aboutHTML}
+    </div>
+
+    <!-- Selected Work & Case Studies View -->
+    <div id="work-view" class="page-view" style="display: none;"></div>
+
+    <!-- Project Contact & Enquiry View -->
+    <div id="contact-view" class="page-view" style="display: none;"></div>
+  `;
 }
+
+const homeView = document.getElementById("home-view");
+const workView = document.getElementById("work-view");
+const contactView = document.getElementById("contact-view");
 
 const heroSection = document.querySelector(".hero");
 const lenis = new Lenis({ autoRaf: true });
 
-// 2. State & UI Initialization
+// 2. Three.js State & UI Initialization
 const { renderer, scene, camera, cameraPositionUniform, handleResize } = initRenderer(heroSection);
 const { spiral, meshes, spiralHeight } = createSpiral(scene, renderer, cameraPositionUniform);
 const { elements, handleCursorDOM, updateTooltipPosition } = initUIControls();
 const mobileHandler = initMobileControls(spiral, CONFIG);
 
 // Local State
+let isHomeActive = true;
 let scrollY = 0, spinVelocity = 0;
 let mouseX = 0, mouseY = 0, mouseXPos = 0, mouseYPos = 0, smoothX = 0, smoothY = 0;
 let canvasRect = renderer.domElement.getBoundingClientRect();
@@ -32,13 +54,44 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let hoveredMesh = null;
 
-// 3. Handlers
+// 3. Router & Navigation Setup
+let menuOverlayController = null;
+
+const router = createRouter(
+  {
+    home: homeView,
+    work: workView,
+    contact: contactView,
+    renderWork: (container, r, slug) => renderWorkPage(container, r, slug),
+    renderContact: (container, r) => renderContactPage(container, r)
+  },
+  {
+    onStateChange: (active) => {
+      isHomeActive = active;
+      if (active) {
+        canvasRect = renderer.domElement.getBoundingClientRect();
+      }
+    },
+    onNavigate: () => {
+      if (menuOverlayController) {
+        menuOverlayController.bindMenuButtons();
+      }
+    }
+  }
+);
+
+// Initialize Menu Overlay
+menuOverlayController = initMenuOverlay(router);
+
+// 4. Handlers
 lenis.on("scroll", (e) => {
+  if (!isHomeActive) return;
   scrollY = window.pageYOffset;
   spinVelocity = e.velocity * CONFIG.scrollRotationMultiplier;
 });
 
 window.addEventListener("mousemove", (e) => {
+  if (!isHomeActive) return;
   mouse.x = ((e.clientX - canvasRect.left) / canvasRect.width) * 2 - 1;
   mouse.y = -((e.clientY - canvasRect.top) / canvasRect.height) * 2 + 1;
   mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -50,12 +103,16 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("scroll", () => {
+  if (isHomeActive) {
     canvasRect = renderer.domElement.getBoundingClientRect();
+  }
 });
 
-// 4. Animation Loop
+// 5. Animation Loop
 function animate() {
   requestAnimationFrame(animate);
+
+  if (!isHomeActive) return;
 
   const scrollProgress = Math.min(
     scrollY / (window.innerHeight * CONFIG.scrollMultiplier),
@@ -82,9 +139,13 @@ function animate() {
       if (hoveredMesh !== first) {
         meshes.forEach(m => m.userData.targetZ = 0);
         hoveredMesh = first;
-        elements.tooltipText.innerText = hoveredMesh.userData.title;
-        elements.tooltip.style.opacity = '1';
-        elements.tooltip.classList.add('active');
+        if (elements.tooltipText) {
+          elements.tooltipText.innerText = hoveredMesh.userData.title;
+        }
+        if (elements.tooltip) {
+          elements.tooltip.style.opacity = '1';
+          elements.tooltip.classList.add('active');
+        }
       }
       hoveredMesh.userData.targetZ = 0.8;
     } else {
@@ -92,8 +153,10 @@ function animate() {
         hoveredMesh.userData.targetZ = 0;
         hoveredMesh = null;
       }
-      elements.tooltip.style.opacity = '0';
-      elements.tooltip.classList.remove('active');
+      if (elements.tooltip) {
+        elements.tooltip.style.opacity = '0';
+        elements.tooltip.classList.remove('active');
+      }
     }
 
     // Cursor Color Logic
@@ -127,5 +190,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// 5. Run it!
+// 6. Run Router & Animation
+router.init();
 animate();

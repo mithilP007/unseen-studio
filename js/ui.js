@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 export function initUIControls() {
   const elements = {
     xHero: document.getElementById('x-coord-hero'),
