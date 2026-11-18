@@ -1,6 +1,4 @@
-# Studio Dialect 3D Spiral Image Gallery
 
-![Website Preview](./public/website%20preview%20img.png)
 
 A mesmerizing, high-fidelity 3D spiral image gallery built with WebGL. This project creates an immersive, interactive experience featuring custom procedural geometry, real-time shaders, and advanced physics-based interactions.
 
